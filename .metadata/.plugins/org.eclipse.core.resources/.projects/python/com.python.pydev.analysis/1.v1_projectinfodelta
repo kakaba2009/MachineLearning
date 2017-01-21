@@ -1,0 +1,10 @@
+INSTUPsaveFXData
+D:\git\MachineLearning\python\saveFXData.py
+INFOS:&&3|1|2|0&&3|1|2|0&&3|3|2|0&&3|4|2|0&&3|5|2|0&&3|5|2|0&&3|6|2|0&&3|7|2|0
+df=5
+siz=6
+Symbols=1
+start=3
+end=4
+disk_engine=7
+saveFXData=2
