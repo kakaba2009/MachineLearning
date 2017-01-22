@@ -2,7 +2,7 @@ library(tseriesChaos)
 library(data.table)
 library(tsDyn)
 
-source("./lib/mtool.R")
+source("./mylib/mtool.R")
 
 data(forex)
 
