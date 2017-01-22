@@ -4,6 +4,9 @@ source('./lib/mcalc.R')
 source('./lib/mtool.R')
 source('./lib/mfractal.R')
 
+#saveCSV('JPY=X')
+
+x <- loadSymbol('JPY=X')
 x <- loadTimeSeries('JPY=X', 'High')
 #x <- as.ts(forex['x'])
 #x <- x[1:1000,]

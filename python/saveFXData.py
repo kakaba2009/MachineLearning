@@ -22,11 +22,15 @@ for Symbol in Symbols:
     
     siz = len(df["Close"])
 
-    #df.insert(0, "Symbol", Symbol, True)
     df["Symbol"] = np.repeat(Symbol, siz)
     
-    print(df, "\n")
+    print(df.values, "\n")
 
     disk_engine = create_engine('sqlite:///src/db/forex1.db')
 
     df.to_sql("FX", disk_engine, if_exists='append');
+    
+    #save csv files
+    #filename = 'src/db/' + Symbol + '.csv' 
+    #df.to_csv(filename, mode='a', columns=['Close'], header=False, index=False)
+    #np.savetxt(filename, df.values , fmt='%.2f', delimiter=',')
