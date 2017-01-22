@@ -13,10 +13,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.neighbors import *
-import src.lib.mfile  as mfile
-import src.lib.mcalc  as mcalc
-import src.lib.mplot  as mplot
-import src.lib.mlearn as mlearn
+import src.mylib.mfile as mfile
+import src.mylib.mcalc as mcalc
+import src.mylib.mplot as mplot
+import src.mylib.mlearn as mlearn
 
 epsilon = np.power(10, -15)
 # 1. Importing my series

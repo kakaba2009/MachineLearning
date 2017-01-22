@@ -1,9 +1,9 @@
 import numpy
 import pandas
-import src.lib.mfile  as mfile
-import src.lib.mcalc  as mcalc
-import src.lib.mplot  as mplot
-import src.lib.mlearn as mlearn
+import src.mylib.mfile as mfile
+import src.mylib.mcalc as mcalc
+import src.mylib.mplot as mplot
+import src.mylib.mlearn as mlearn
 import matplotlib.pyplot as plt
 from sklearn.model_selection import KFold
 from sklearn.ensemble import RandomForestRegressor

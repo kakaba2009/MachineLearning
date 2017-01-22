@@ -18,10 +18,10 @@ from mpl_toolkits.mplot3d import Axes3D
 from numpy import *
 from pandas import *
 import datetime as dt
-import src.lib.mfile  as mfile
-import src.lib.mcalc  as mcalc
-import src.lib.mplot  as mplot
-import src.lib.mlearn as mlearn
+import src.mylib.mfile as mfile
+import src.mylib.mcalc as mcalc
+import src.mylib.mplot as mplot
+import src.mylib.mlearn as mlearn
 
 # 1. Importing my series
 dfs = mfile.loadAll("../db/forex.db", dropDate=False)

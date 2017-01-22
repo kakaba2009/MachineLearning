@@ -5,10 +5,10 @@ from sklearn import metrics
 from sklearn import datasets
 import matplotlib.pyplot as plt
 import pandas as pd
-import src.lib.mfile  as mfile
-import src.lib.mcalc  as mcalc
-import src.lib.mplot  as mplot
-import src.lib.mlearn as mlearn
+import src.mylib.mfile as mfile
+import src.mylib.mcalc as mcalc
+import src.mylib.mplot as mplot
+import src.mylib.mlearn as mlearn
 
 df = mfile.loadOneSymbol("JPY=X", "../db/forex.db")
 df = mcalc.m_sample_w(df)

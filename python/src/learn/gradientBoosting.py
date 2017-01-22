@@ -1,5 +1,5 @@
-import src.lib.mfile as mfile
-import src.lib.mcalc as mcalc
+import src.mylib.mfile as mfile
+import src.mylib.mcalc as mcalc
 from sklearn import ensemble
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt

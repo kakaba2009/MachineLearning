@@ -2,9 +2,9 @@
 import numpy
 import pandas
 import math
-import src.lib.mfile  as mfile
-import src.lib.mcalc  as mcalc
-import src.lib.mlstm  as mlstm
+import src.mylib.mfile as mfile
+import src.mylib.mcalc as mcalc
+import src.mylib.mlstm as mlstm
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM

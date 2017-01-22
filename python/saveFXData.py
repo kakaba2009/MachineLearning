@@ -2,7 +2,7 @@ import datetime
 import numpy as np
 import pandas_datareader.data as web
 from sqlalchemy import create_engine
-import src.lib.mfile as mfile
+import src.mylib.mfile as mfile
 
 Symbols = mfile.loadSymbolList("src/db/forex.db")
 

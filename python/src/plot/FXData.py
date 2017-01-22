@@ -1,6 +1,6 @@
-import src.lib.mfile as mfile
-import src.lib.mcalc as mcalc
-import src.lib.mplot as mplot
+import src.mylib.mfile as mfile
+import src.mylib.mcalc as mcalc
+import src.mylib.mplot as mplot
 
 #df = mfile.loadSymbolList("../db/forex.db")
 #df = df["Symbol"]
