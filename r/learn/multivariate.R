@@ -1,16 +1,26 @@
 library(rEDM)
+library(data.table)
+library(dplyr)
 
 source('./mylib/mcalc.R')
 source('./mylib/mtool.R')
-source('./mylib/mfractal.R')
 
-block_3sp <- loadSymbol('JPY=X')
+JPY <- loadSymbol('JPY=X')
+JPY <- tail(JPY, 1000)
 
-lib  <- c(1, NROW(block_3sp))
-pred <- c(1, NROW(block_3sp))
+EUR <- loadSymbol('EUR=X')
+EUR <- tail(EUR, 1000)
 
-block_lnlp_output <- block_lnlp(block_3sp, lib = lib, pred = pred, columns = c(1, 2, 3, 4), 
-                                target_column = 4, stats_only = FALSE, first_column_time = TRUE)
+setDT(JPY)
+setDT(EUR)
+
+df <- left_join(JPY, EUR, by=c("Date"))
+
+lib  <- c(1, NROW(df))
+pred <- c(1, NROW(df))
+
+block_lnlp_output <- block_lnlp(df, lib = lib, pred = pred, columns = c("Close.x","Close.y"), 
+                        target_column = "Close.x", stats_only = FALSE, first_column_time = TRUE)
 
 observed  <- block_lnlp_output[[1]]$model_output$obs
 predicted <- block_lnlp_output[[1]]$model_output$pred

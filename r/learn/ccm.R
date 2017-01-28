@@ -1,19 +1,30 @@
 library(rEDM)
+library(data.table)
+library(dplyr)
 
 source('./mylib/mcalc.R')
 source('./mylib/mtool.R')
-source('./mylib/mfractal.R')
 
-df <- loadSymbol('JPY=X')
+JPY <- loadSymbol('JPY=X')
+JPY <- tail(JPY, 1000)
+
+EUR <- loadSymbol('EUR=X')
+EUR <- tail(EUR, 1000)
+
+setDT(JPY)
+setDT(EUR)
+
+df <- left_join(JPY, EUR, by=c("Date"))
 
 data(sardine_anchovy_sst)
 
-anchovy_xmap_sst <- ccm(sardine_anchovy_sst, E = 3, lib_column = "anchovy", 
-                        target_column = "np_sst", lib_sizes = seq(10, 80, by = 10), 
-                        random_libs = FALSE)
+anchovy_xmap_sst <- ccm(df, E = 3, lib_column = "Close.x", target_column = "Close.y", 
+                        lib_sizes = seq(800, 1000, by = 200), 
+                        random_libs = FALSE, first_column_time=TRUE)
 
-sst_xmap_anchovy <- ccm(sardine_anchovy_sst, E = 3, lib_column = "np_sst", target_column = "anchovy", 
-                        lib_sizes = seq(10, 80, by = 10), random_libs = FALSE)
+sst_xmap_anchovy <- ccm(df, E = 3, lib_column = "Close.y", target_column = "Close.x", 
+                        lib_sizes = seq(800, 1000, by = 200), 
+                        random_libs = FALSE, first_column_time=TRUE)
 
 a_xmap_t_means <- ccm_means(anchovy_xmap_sst)
 t_xmap_a_means <- ccm_means(sst_xmap_anchovy)
