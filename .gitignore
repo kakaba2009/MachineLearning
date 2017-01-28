@@ -88,6 +88,8 @@ ENV/
 # Rope project settings
 .ropeproject
 .Rproj.user
+.Rhistory
+.RData
 
 # Eclipse metadata
 .metadata
