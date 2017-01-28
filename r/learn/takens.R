@@ -5,7 +5,7 @@ source('./mylib/mcalc.R')
 source('./mylib/mtool.R')
 source('./mylib/mfractal.R')
 
-#saveCSV('JPY=X')
+saveCSV('JPY=X')
 
 df <- loadSymbol('JPY=X')
 df <- df$High

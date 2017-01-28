@@ -19,30 +19,30 @@ from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import MinMaxScaler
 
 # convert an array of values into a dataset matrix
-def create_dataset(dataset, look_back=1):
+def create_dataset(dataset, seqn_size=1):
     dataX, dataY = [], []
     
-    for i in range(dataset.shape[0]-look_back):
-        a = dataset[i:(i+look_back),    :]
+    for i in range(dataset.shape[0]-seqn_size):
+        a = dataset[i:(i+seqn_size),    :]
         a = np.ndarray.flatten(a)
         dataX.append(a)
         
-        b = dataset[i+1:(i+look_back+1),:]
+        b = dataset[i+1:(i+seqn_size+1),:]
         b = np.ndarray.flatten(b)
         dataY.append(b)
         #print( a, '->', b )
     
     return np.array(dataX), np.array(dataY)
 
-def create_dataset_class(dataset, look_back=1):
+def create_dataset_class(dataset, seqn_size=1):
     dataX, dataY = [], []
     
-    for i in range(dataset.shape[0]-look_back):
-        a = dataset[i:(i+look_back),   :]
+    for i in range(dataset.shape[0]-seqn_size):
+        a = dataset[i:(i+seqn_size),   :]
         dataX.append(a)
 
-        b = dataset[i + look_back,     :] 
-        p = dataset[i + look_back - 1, :] 
+        b = dataset[i + seqn_size,     :] 
+        p = dataset[i + seqn_size - 1, :] 
         if(b > p):        
             dataY.append([1, 0, 0])
         elif(b == p):
@@ -174,14 +174,14 @@ def printScore(model, X, Y):
     scores = model.evaluate(X, Y, verbose=0)
     print('Evaluate Score:', scores)
     
-def plot_result_1F(dataset, train, test, look_back):
+def plot_result_1F(dataset, train, test, seqn_size):
     #input array shape is (, 1)
     style.use('ggplot')
     
     # shift train predictions for plotting
     trainPr       = np.empty_like(dataset)
     trainPr[:, :] = np.nan
-    trainPr[look_back:len(train)+look_back, :] = train
+    trainPr[seqn_size:len(train)+seqn_size, :] = train
     # shift test predictions for plotting
     testPre       = np.empty_like(dataset)
     testPre[:, :] = np.nan
@@ -269,14 +269,14 @@ def plot_all_feature(X, c):
         plt.scatter(np.arange(F.shape[0]), F, color=c)
         
     
-def plot_result_2F(dataset, train, test, look_back):
+def plot_result_2F(dataset, train, test, seqn_size):
     #input array shape is (, 2)
     style.use('ggplot')
     
     # shift train predictions for plotting
     trainPr       = np.empty_like(dataset)
     trainPr[:, :] = np.nan
-    trainPr[look_back:len(train)+look_back, :] = train
+    trainPr[seqn_size:len(train)+seqn_size, :] = train
     # shift test predictions for plotting
     testPre       = np.empty_like(dataset)
     testPre[:, :] = np.nan
@@ -298,14 +298,14 @@ def loadFXData(Symbol, db, num):
     
     return dataframe
 
-def setupTrainTest(dataset, look_back, SCALE, LOG):
+def setupTrainTest(dataset, seqn_size, SCALE, LOG):
     # split into train and test sets
-    test_size  = look_back + 5
+    test_size  = seqn_size + 5
     train_size = dataset.shape[0] - test_size
     train, test = dataset[0:train_size,:], dataset[train_size:len(dataset),:]
     # reshape into X=t and Y=t+1
-    trainX, trainY = create_dataset(train, look_back)
-    testX,  testY  = create_dataset(test, look_back)
+    trainX, trainY = create_dataset(train, seqn_size)
+    testX,  testY  = create_dataset(test, seqn_size)
     
     printX_YScaler(testX, testY, SCALE, LOG)
     
