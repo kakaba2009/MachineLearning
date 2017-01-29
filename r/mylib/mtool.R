@@ -4,6 +4,8 @@ library(Quandl)
 library(DBI)
 library("RSQLite")
 
+mtool.api = ''
+
 loadSymbol <- function(symbol) {
     #setwd("D:/workspace/rEDM")
     # connect to the sqlite file
@@ -59,7 +61,15 @@ saveCSV <- function(symbol) {
     write.csv(df, file = paste("./db/", symbol, ".csv", sep=''), row.names = FALSE)
 }
 
+getQuantmod <- function(symbol) {
+    df <- getSymbols(symbol, src="yahoo", env=NULL)
+    
+    return(df)    
+}
+
 getQuandl <- function(symbol, feq="daily", start="1900-01-01", t="raw") {
+    Quandl.api_key(mtool.api)
+    
     df <- Quandl(symbol, collapse=feq, start_date=start, type=t)
     
     class(df)
@@ -67,18 +77,15 @@ getQuandl <- function(symbol, feq="daily", start="1900-01-01", t="raw") {
     return(df)   
 }
 
-getQuantmod <- function(symbol) {
-    df <- getSymbols(symbol, src="yahoo", env=NULL)
-    
-    return(df)    
-}
-
 search <- function(symbol="Oil", db="YAHOO") {
+    Quandl.api_key(mtool.api)
     ret <- Quandl.search(symbol, database_code = db, per_page = 10)
     
     return(ret)
 }
 
 download <- function(db="NSE") {
+    Quandl.api_key(mtool.api)
+    
     Quandl.database.bulk_download_to_file(db, paste("./db/", db,".zip", sep=""))
 }
