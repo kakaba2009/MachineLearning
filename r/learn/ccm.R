@@ -19,11 +19,11 @@ df <- inner_join(df1, df2, by=c("Date"))
 data(sardine_anchovy_sst)
 
 anchovy_xmap_sst <- ccm(df, E = 3, lib_column = "Close.x", target_column = "Close.y", 
-                        lib_sizes = seq(800, 1000, by = 100), 
+                        lib_sizes = seq(500, 1000, by = 100), 
                         random_libs = FALSE, first_column_time=TRUE)
 
 sst_xmap_anchovy <- ccm(df, E = 3, lib_column = "Close.y", target_column = "Close.x", 
-                        lib_sizes = seq(800, 1000, by = 100), 
+                        lib_sizes = seq(500, 1000, by = 100), 
                         random_libs = FALSE, first_column_time=TRUE)
 
 a_xmap_t_means <- ccm_means(anchovy_xmap_sst)

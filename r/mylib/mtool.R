@@ -12,6 +12,10 @@ loadSymbol <- function(symbol) {
     # get the populationtable as a data.frame
     p <- dbGetQuery( con, query )
     
+    if(nrow(p)==0) {
+        stop("invalid data frame: nrow is 0")
+    }
+    
     return(p)
 }
 

@@ -2,18 +2,14 @@ library(rEDM)
 
 source('./mylib/mcalc.R')
 source('./mylib/mtool.R')
-source('./mylib/mfractal.R')
 
-df <- loadSymbol('JPY=X')
+df <- loadSymbol('HKG=X')
 df <- df$Close
-ts <- as.ts(df)
-ts <- tail(ts, n=5200)
-print(tail(ts))
 
-lib  <- c(1, 5000)
-pred <- c(5001, 5200)
+lib  <- c(1,    2000)
+pred <- c(2001, 2500)
 
-simplex_output <- simplex(ts, lib, pred)
+simplex_output <- simplex(df, lib, pred, E = 2:12)
 
 par(mar = c(4, 4, 1, 1), mgp = c(2.5, 1, 0))
 
