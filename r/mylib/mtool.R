@@ -68,7 +68,9 @@ getQuantmod <- function(symbol) {
 }
 
 getQuandl <- function(symbol, feq="daily", start="1900-01-01", t="raw") {
-    Quandl.api_key(mtool.api)
+    if(nchar(mtool.api) >0 ) {
+        Quandl.api_key(mtool.api)
+    }
     
     df <- Quandl(symbol, collapse=feq, start_date=start, type=t)
     
@@ -78,14 +80,19 @@ getQuandl <- function(symbol, feq="daily", start="1900-01-01", t="raw") {
 }
 
 search <- function(symbol="Oil", db="YAHOO") {
-    Quandl.api_key(mtool.api)
+    if(nchar(mtool.api) >0 ) {
+        Quandl.api_key(mtool.api)
+    }
+    
     ret <- Quandl.search(symbol, database_code = db, per_page = 10)
     
     return(ret)
 }
 
 download <- function(db="NSE") {
-    Quandl.api_key(mtool.api)
+    if(nchar(mtool.api) >0 ) {
+        Quandl.api_key(mtool.api)
+    }
     
     Quandl.database.bulk_download_to_file(db, paste("./db/", db,".zip", sep=""))
 }

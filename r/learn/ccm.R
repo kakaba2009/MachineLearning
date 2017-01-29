@@ -22,11 +22,11 @@ df <- inner_join(df1, df2, by=c("Date"))
 
 data(sardine_anchovy_sst)
 
-anchovy_xmap_sst <- ccm(df, E = 3, lib_column = "Rate", target_column = "Last", 
+anchovy_xmap_sst <- ccm(df, E = 7, lib_column = "Rate", target_column = "Last", 
                         lib_sizes = seq(800, 1000, by = 100), 
                         random_libs = FALSE, first_column_time=TRUE)
 
-sst_xmap_anchovy <- ccm(df, E = 3, lib_column = "Last", target_column = "Rate", 
+sst_xmap_anchovy <- ccm(df, E = 7, lib_column = "Last", target_column = "Rate", 
                         lib_sizes = seq(800, 1000, by = 100), 
                         random_libs = FALSE, first_column_time=TRUE)
 
