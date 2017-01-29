@@ -1,6 +1,6 @@
 library(nonlinearTseries)
-library(forecast)
 library(tsDyn)
+library(rEDM)
 
 calcTakens <- function(x, dim, lag) {
     takens = buildTakens(x, embedding.dim=dim, time.lag=lag)
@@ -121,4 +121,12 @@ SampleEntropy <- function(cd, d1, d2, r1, r2) {
     print(se.est)
     
     cat("Estimated = ", mean(se.est),"\n")
+}
+
+BestDimEDM <- function(df, lib, pred) {
+    simplex_output <- simplex(df, lib, pred, E = 2:12)
+    
+    bestE <- simplex_output$E[which.max(simplex_output$rho)]
+    
+    return(bestE)    
 }

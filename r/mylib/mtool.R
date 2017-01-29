@@ -1,3 +1,5 @@
+library(quantmod)
+library(Quandl)
 library(DBI)
 library("RSQLite")
 
@@ -54,4 +56,18 @@ saveCSV <- function(symbol) {
     df <- loadSymbol(symbol)
     
     write.csv(df, file = paste("./db/", symbol, ".csv", sep=''), row.names = FALSE)
+}
+
+getQuandl <- function(symbol, feq="daily", start="1900-01-01") {
+    df <- Quandl(symbol, collapse=feq, start_date=start, type="xts")
+    
+    class(df)
+    
+    return(df)   
+}
+
+getQuantmod <- function(symbol) {
+    df <- getSymbols(symbol, src="yahoo", env=NULL)
+    
+    return(df)    
 }
