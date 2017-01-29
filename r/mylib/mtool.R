@@ -72,3 +72,13 @@ getQuantmod <- function(symbol) {
     
     return(df)    
 }
+
+search <- function(symbol="Oil", db="YAHOO") {
+    ret <- Quandl.search(symbol, database_code = db, per_page = 10)
+    
+    return(ret)
+}
+
+download <- function(db="NSE") {
+    Quandl.database.bulk_download_to_file(db, paste("./db/", db,".zip", sep=""))
+}
