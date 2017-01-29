@@ -1,3 +1,4 @@
+library(timeSeries)
 library(quantmod)
 library(Quandl)
 library(DBI)
@@ -58,8 +59,8 @@ saveCSV <- function(symbol) {
     write.csv(df, file = paste("./db/", symbol, ".csv", sep=''), row.names = FALSE)
 }
 
-getQuandl <- function(symbol, feq="daily", start="1900-01-01") {
-    df <- Quandl(symbol, collapse=feq, start_date=start, type="xts")
+getQuandl <- function(symbol, feq="daily", start="1900-01-01", t="raw") {
+    df <- Quandl(symbol, collapse=feq, start_date=start, type=t)
     
     class(df)
     

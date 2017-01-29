@@ -5,11 +5,15 @@ library(dplyr)
 source('./mylib/mcalc.R')
 source('./mylib/mtool.R')
 
-df1 <- loadSymbol('JPY=X')
-df1 <- tail(df1, 1000)
+start = "2000-01-01"
 
-df2 <- loadSymbol('EUR=X')
-df2 <- tail(df2, 1000)
+df1 <- getQuandl("CURRFX/USDJPY", "daily", start, "raw")
+#df1 <- loadSymbol('JPY=X')
+df1 <- head(df1, 1000)
+
+df2 <- getQuandl("CHRIS/CME_GC1", "daily", start, "raw")
+#df2 <- loadSymbol('EUR=X')
+df2 <- head(df2, 1000)
 
 setDT(df1)
 setDT(df2)
@@ -18,12 +22,12 @@ df <- inner_join(df1, df2, by=c("Date"))
 
 data(sardine_anchovy_sst)
 
-anchovy_xmap_sst <- ccm(df, E = 3, lib_column = "Close.x", target_column = "Close.y", 
-                        lib_sizes = seq(500, 1000, by = 100), 
+anchovy_xmap_sst <- ccm(df, E = 3, lib_column = "Rate", target_column = "Last", 
+                        lib_sizes = seq(800, 1000, by = 100), 
                         random_libs = FALSE, first_column_time=TRUE)
 
-sst_xmap_anchovy <- ccm(df, E = 3, lib_column = "Close.y", target_column = "Close.x", 
-                        lib_sizes = seq(500, 1000, by = 100), 
+sst_xmap_anchovy <- ccm(df, E = 3, lib_column = "Last", target_column = "Rate", 
+                        lib_sizes = seq(800, 1000, by = 100), 
                         random_libs = FALSE, first_column_time=TRUE)
 
 a_xmap_t_means <- ccm_means(anchovy_xmap_sst)

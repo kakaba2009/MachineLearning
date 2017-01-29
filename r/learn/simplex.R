@@ -5,8 +5,8 @@ source('./mylib/mtool.R')
 
 start = "1990-01-01"
 
-df <- getQuandl("CURRFX/USDJPY", "daily", start)
-#df <- getQuandl("LBMA/GOLD", "daily", start)
+#df <- getQuandl("CURRFX/USDJPY", "daily", start)
+df <- getQuandl("CHRIS/CME_GC1", "daily", start, "raw")
 #df <- loadSymbol('JPY=X')
 #df <- df$Close
 
