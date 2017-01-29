@@ -5,16 +5,16 @@ library(dplyr)
 source('./mylib/mcalc.R')
 source('./mylib/mtool.R')
 
-JPY <- loadSymbol('JPY=X')
-JPY <- tail(JPY, 1000)
+df1 <- loadSymbol('GBP=X')
+df1 <- tail(df1, 1000)
 
-EUR <- loadSymbol('EUR=X')
-EUR <- tail(EUR, 1000)
+df2 <- loadSymbol('EUR=X')
+df2 <- tail(df2, 1000)
 
-setDT(JPY)
-setDT(EUR)
+setDT(df1)
+setDT(df2)
 
-df <- left_join(JPY, EUR, by=c("Date"))
+df <- inner_join(df1, df2, by=c("Date"))
 
 lib  <- c(1, NROW(df))
 pred <- c(1, NROW(df))
