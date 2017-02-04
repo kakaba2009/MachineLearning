@@ -1,11 +1,11 @@
 source('./mylib/mcalc.R')
 source('./mylib/mtool.R')
 
-start = "2000-01-01"
+start = "2016-01-01"
 
 #download("WIKI")
 
-df <- search("HKD", "")
+#df <- search("HKD", "")
 
 df <- getQuandl("CUR/JPY", "daily", start, "raw")
 
