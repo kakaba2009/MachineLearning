@@ -5,21 +5,22 @@ source('./mylib/mtool.R')
 
 start = "1990-01-01"
 
-df <- getQuandl("CURRFX/USDJPY", "daily", start, "raw")
-df <- getQuandl("CHRIS/CME_GC1", "daily", start, "raw")
-#df <- loadSymbol('JPY=X')
-#df <- df$Close
+#df <- getQuandl("CURRFX/USDJPY", "daily", start, "raw")
+#df <- getQuandl("CHRIS/CME_GC1", "daily", start, "raw")
+df <- loadSymbol('JPY=X')
+df <- df[ ,c('Close')]
+df <- tail(df, 500)
 
-lib  <- c(1,    2000)
-pred <- c(2001, 2500)
+lib  <- c(1, 500)
+pred <- c(1, 500)
 
-simplex_output <- simplex(df, lib, pred, E = 2:12)
+BestE <- BestDimEDM(df, lib, pred)
+cat("BestE: ", BestE, "\n")
 
-par(mar = c(4, 4, 1, 1), mgp = c(2.5, 1, 0))
-
-plot(simplex_output$E, simplex_output$rho, type = "l", xlab = "Embedding Dimension (E)", 
-     ylab = "Forecast Skill (rho)")
-
-bestE <- simplex_output$E[which.max(simplex_output$rho)]
-
-cat("Best Dim:", bestE)
+lib  <- c(1, 500)
+pred <- c(1, 501)
+simplex_output <- simplex(df, lib, pred, E=BestE, tp=1, stats_only=FALSE)
+observed  <- simplex_output[[1]]$model_output$obs
+predicted <- simplex_output[[1]]$model_output$pred
+print(tail(observed,  10))
+print(tail(predicted, 10))

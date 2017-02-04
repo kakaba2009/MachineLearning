@@ -128,5 +128,26 @@ BestDimEDM <- function(df, lib, pred) {
     
     bestE <- simplex_output$E[which.max(simplex_output$rho)]
     
+    par(mar = c(4, 4, 1, 1), mgp = c(2.5, 1, 0))
+    
+    plot(simplex_output$E, simplex_output$rho, type = "l", xlab = "Embedding Dimension (E)", ylab = "Forecast Skill (rho)")    
+    
+    cat("BestE: ", bestE, "\n")
+    
     return(bestE)    
+}
+
+BestThetaEDM <- function(df, lib, pred, BestE) {
+    smap_output <- s_map(df, lib, pred, E=BestE, stats_only=TRUE)
+    
+    m <- which.max(smap_output$rho)
+    cat("Best rho run:", m, "\n")
+    
+    bestTheta <- smap_output$theta[m]
+    cat("Best theta:", bestTheta, "\n")
+    
+    par(mar = c(4, 4, 1, 1), mgp = c(2.5, 1, 0))
+    plot(smap_output$theta, smap_output$rho, type = "l", xlab = "Nonlinearity (theta)", ylab = "Forecast Skill (rho)")
+    
+    return(bestTheta)
 }
