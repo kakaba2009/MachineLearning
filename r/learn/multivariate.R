@@ -7,6 +7,7 @@ source('./mylib/mtool.R')
 
 df1 <- loadSymbol('JPY=X')
 df1 <- tail(df1, 1000)
+#df1 <- make_block(df1)
 df2 <- loadSymbol('EUR=X')
 df2 <- tail(df2, 1000)
 df3 <- loadSymbol('GBP=X')
@@ -31,5 +32,6 @@ predicted <- block_lnlp_output[[1]]$model_output$pred
 par(mar = c(4, 4, 1, 1), pty = "s")
 plot_range <- range(c(observed, predicted), na.rm = TRUE)
 plot(observed, predicted, xlim = plot_range, ylim = plot_range, xlab = "Observed", ylab = "Predicted")
-
 abline(a = 0, b = 1, lty = 2, col = "blue")
+tail(observed)
+tail(predicted)
