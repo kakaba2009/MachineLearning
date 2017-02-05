@@ -16,4 +16,4 @@ r <- calcInfoDimension(ts, d, 1)
 
 l <- calcLyapunov(ts, 1, r*2.0)
 
-rqa <- calcRQA(t, ts, d, r*2.0)
+rqa <- calcRQA(t, NULL, d, r*2.0)
