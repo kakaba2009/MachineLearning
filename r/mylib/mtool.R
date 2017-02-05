@@ -4,7 +4,7 @@ library(Quandl)
 library(DBI)
 library("RSQLite")
 
-mtool.api = ''
+mtool.api = 'M-pbVU9jbrCEWxxTDKhc'
 
 loadSymbol <- function(symbol) {
     #setwd("D:/workspace/rEDM")
@@ -13,7 +13,10 @@ loadSymbol <- function(symbol) {
     # get a list of all tables
     alltables <- dbListTables(con)
     #query <- paste('SELECT DISTINCT Symbol FROM FX',sep='')
-    query <- paste('SELECT Date,Open,High,Low,Close FROM FX WHERE Symbol = ',"'",symbol,"'",sep='')
+    query <- paste('SELECT Date,Close,Open,High,Low FROM FX WHERE Symbol = ',"'",symbol,"'"
+                   ,' ORDER BY Date Desc '
+                   ,sep='')
+    print(query)
     # get the populationtable as a data.frame
     p <- dbGetQuery( con, query )
     

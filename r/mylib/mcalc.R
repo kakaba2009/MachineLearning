@@ -6,6 +6,8 @@ calcTakens <- function(x, dim, lag) {
     takens = buildTakens(x, embedding.dim=dim, time.lag=lag)
     
     plot(takens)
+    
+    return(takens)
 }
 
 calcTimeLag <- function(x) {
@@ -30,7 +32,7 @@ calcLyapunov <- function(ts, lag, radius=1.0) {
                              use.embeddings=4:8,
                              do.plot = TRUE)
     #max Lyapunov exponent
-    cat("max Lyapunov exponent: ",ml.estimation,"\n")
+    cat("max Lyapunov exponent: ", ml.estimation, "\n")
     return (ml.estimation)
 }
 
@@ -38,7 +40,7 @@ calcBestDimension <- function(x, lag=1, t=0.90) {
     dimension = estimateEmbeddingDim(x, time.lag=lag, max.embedding.dim=10,
                                      threshold=t, do.plot=TRUE)
     
-    cat("Best dimension:", dimension)
+    cat("Best dimension:", dimension, "\n")
     
     return(dimension)
 }
@@ -57,7 +59,7 @@ calcInfoDimension <- function(ts, d, lag, r=0.001) {
     
     r <- sapply(i[2], mean)
     
-    cat('info dimension logRadius:', r)
+    cat('info dimension logRadius:', r, '\n')
     
     #plot(i, type="l")
     
@@ -66,8 +68,15 @@ calcInfoDimension <- function(ts, d, lag, r=0.001) {
 
 calcRQA <- function(tk, ts, d, r) {
     rqa.analysis=rqa(takens = tk, time.series = ts, embedding.dim=d, time.lag=1,
-                     radius=r,lmin=2,do.plot=FALSE,distanceToBorder=2)
-    plot(rqa.analysis)    
+                     radius=r,lmin=2,do.plot=TRUE,distanceToBorder=2)
+    #plot(rqa.analysis)
+
+    cat("Percentage of recurrence points in a Recurrence Plot:",     rqa.analysis$REC, "\n")
+    cat("Percentage of recurrence points that form diagonal lines:", rqa.analysis$DET, "\n")
+    
+    #plot(rqa.analysis$recurrenceRate)
+    
+    return(rqa.analysis)
 }
 
 AdditiveNonlinearAutoregressive <- function(x, d) {
@@ -123,7 +132,7 @@ SampleEntropy <- function(cd, d1, d2, r1, r2) {
     cat("Estimated = ", mean(se.est),"\n")
 }
 
-BestDimEDM <- function(df, lib, pred) {
+BestDimEDM <- function(df, lib = c(1, NROW(df)), pred = lib) {
     simplex_output <- simplex(df, lib, pred, E = 2:12)
     
     bestE <- simplex_output$E[which.max(simplex_output$rho)]

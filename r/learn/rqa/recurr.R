@@ -23,6 +23,3 @@ recurr(x, m=7, d=1) #levels=c(0,0.2,1)
 #autotriples(x)
 #autotriples(x, type="persp")
 #autotriples(x, type="image")
-#fit a Neural Network model
-#mod.nnet <- nnetTs(x, m=7, d=1, steps=1, size=16)
-#mod.nnet
