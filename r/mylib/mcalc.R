@@ -61,6 +61,10 @@ calcInfoDimension <- function(ts, d, lag, r=0.001) {
     
     cat('info dimension logRadius:', r, '\n')
     
+    r <- 10 ** r
+    
+    cat('info dimension Radius:', r, '\n')
+    
     #plot(i, type="l")
     
     return(r)
