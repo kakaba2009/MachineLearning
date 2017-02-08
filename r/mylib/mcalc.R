@@ -72,13 +72,16 @@ calcInfoDimension <- function(ts, d, lag, r=0.001) {
 
 calcRQA <- function(tk, ts, d, r) {
     rqa.analysis=rqa(takens = tk, time.series = ts, embedding.dim=d, time.lag=1,
-                     radius=r,lmin=2,do.plot=TRUE,distanceToBorder=2)
-    #plot(rqa.analysis)
+                     radius=r,lmin=2,do.plot=FALSE,distanceToBorder=2)
+    plot(rqa.analysis)
 
-    cat("Percentage of recurrence points in a Recurrence Plot:",     rqa.analysis$REC, "\n")
-    cat("Percentage of recurrence points that form diagonal lines:", rqa.analysis$DET, "\n")
+    cat("Percentage of recurrence points in a Recurrence Plot:",     rqa.analysis$REC,  "\n")
+    cat("Percentage of recurrence points that form diagonal lines:", rqa.analysis$DET,  "\n")
+    cat("Percentage of recurrent points that form vertical lines:",  rqa.analysis$LAM,  "\n")
+    cat("Length of the longest diagonal line:",                      rqa.analysis$Lmax, "\n")
+    cat("Length of the longest vertical line:",                      rqa.analysis$Vmax, "\n")
     
-    #plot(rqa.analysis$recurrenceRate)
+    #plot(rqa.analysis$diagonalHistogram)
     
     return(rqa.analysis)
 }
@@ -163,4 +166,16 @@ BestThetaEDM <- function(df, lib, pred, BestE) {
     plot(smap_output$theta, smap_output$rho, type = "l", xlab = "Nonlinearity (theta)", ylab = "Forecast Skill (rho)")
     
     return(bestTheta)
+}
+
+MinDistance <- function(df, k=2) {
+    nearest <- nn2(df,df, k=k)
+    m <- mean(nearest$nn.dists[,k])
+    cat("min distance:", m, "\n")
+}
+
+MaxDistance <- function(df, k=NROW(df)) {
+    nearest <- nn2(df,df, k=k)
+    m <- mean(nearest$nn.dists[,k])
+    cat("max distance:", m, "\n")
 }
