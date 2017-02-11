@@ -142,8 +142,8 @@ SampleEntropy <- function(cd, d1, d2, r1, r2) {
     cat("Estimated = ", mean(se.est),"\n")
 }
 
-BestDimEDM <- function(df, lib = c(1, NROW(df)), pred = lib, E = 2:12) {
-    simplex_output <- simplex(df, lib, pred, E = E)
+BestDimEDM <- function(df, lib = c(1, NROW(df)), pred = lib, E = 2:12, nn = "e+1") {
+    simplex_output <- simplex(df, lib, pred, E = E, num_neighbors = nn)
     
     bestE <- simplex_output$E[which.max(simplex_output$rho)]
     
