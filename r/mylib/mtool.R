@@ -14,7 +14,7 @@ loadSymbol <- function(symbol) {
     alltables <- dbListTables(con)
     #query <- paste('SELECT DISTINCT Symbol FROM FX',sep='')
     query <- paste('SELECT Date,Close,Open,High,Low FROM FX WHERE Symbol = ',"'",symbol,"'"
-                   ,' ORDER BY Date Desc '
+                   ,' ORDER BY Date ASC'
                    ,sep='')
     print(query)
     # get the populationtable as a data.frame

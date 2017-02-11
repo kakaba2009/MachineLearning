@@ -1,6 +1,8 @@
 library(nonlinearTseries)
+library(quantmod)
 library(tsDyn)
 library(rEDM)
+library(zoo)
 
 calcTakens <- function(x, dim, lag) {
     takens = buildTakens(x, embedding.dim=dim, time.lag=lag)
@@ -65,7 +67,7 @@ calcInfoDimension <- function(ts, d, lag, r=0.001) {
     
     cat('info dimension Radius:', r, '\n')
     
-    #plot(i, type="l")
+    names(r) <- "radius"
     
     return(r)
 }
@@ -80,6 +82,7 @@ calcRQA <- function(tk, ts, d, r) {
     cat("Percentage of recurrent points that form vertical lines:",  rqa.analysis$LAM,  "\n")
     cat("Length of the longest diagonal line:",                      rqa.analysis$Lmax, "\n")
     cat("Length of the longest vertical line:",                      rqa.analysis$Vmax, "\n")
+    cat("Shannon entropy of the diagonal line length distribution:", rqa.analysis$ENTR, "\n")
     
     #plot(rqa.analysis$diagonalHistogram)
     
@@ -139,8 +142,8 @@ SampleEntropy <- function(cd, d1, d2, r1, r2) {
     cat("Estimated = ", mean(se.est),"\n")
 }
 
-BestDimEDM <- function(df, lib = c(1, NROW(df)), pred = lib) {
-    simplex_output <- simplex(df, lib, pred, E = 2:12)
+BestDimEDM <- function(df, lib = c(1, NROW(df)), pred = lib, E = 2:12) {
+    simplex_output <- simplex(df, lib, pred, E = E)
     
     bestE <- simplex_output$E[which.max(simplex_output$rho)]
     
@@ -178,4 +181,32 @@ MaxDistance <- function(df, k=NROW(df)) {
     nearest <- nn2(df,df, k=k)
     m <- mean(nearest$nn.dists[,k])
     cat("max distance:", m, "\n")
+}
+
+ComputeVol <- function(ts, width=20) {
+    vol <- rollapply(ts, width, sd)
+    
+    return(vol)
+}
+
+ComputeChange <- function(ts1, ts2=NULL, k=1, type="arithmetic") {
+    chg <- Delt(x1 = ts1, x2 = ts2, k = k, type = type)
+    
+    #ts <- log(ts[-1]/ts[-n])
+    
+    chg <- na.omit(chg)
+    
+    return(chg)
+}
+
+ComputeDifference <- function(ts, lag=1) {
+    delta <- diff(ts, lag=lag) #From base package
+    
+    return(delta)
+}
+
+ComputeSign <- function(delts) {
+    pattern <- sign(delts) #From base package
+    
+    return(pattern)
 }
