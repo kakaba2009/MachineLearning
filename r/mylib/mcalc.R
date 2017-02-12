@@ -210,3 +210,25 @@ ComputeSign <- function(delts) {
     
     return(pattern)
 }
+
+ComputeTimeDiff1 <- function(df) {
+    t <- df[,1] #First is time
+    
+    n <- NROW(t)
+    
+    d <- difftime(t[-1], t[-n], units="days")
+    
+    return(d)
+}
+
+ComputeTimeDiff2 <- function(df) {
+    t <- df[,1] #First is time
+    
+    n <- NROW(t)
+    
+    d <- difftime(t[1], t, units="days")
+    
+    d <- abs(d)
+    
+    return(d)
+}

@@ -195,3 +195,24 @@ def c_value_counts(df, bin):
 
 def c_lastn(df, n):
     return df[-1 * n:]
+
+def computeTimeDiff(df):
+    dt = df.index
+    t0 = np.abs(dt - dt[0])
+    t0 = t0.days
+    df["TimeDiff"] = t0
+    return df
+
+def hyperdist(x, y):
+    t  = x[0] - y[0]
+    t2 = np.power(t, 2)
+    
+    s  = x[1:] - y[1:]
+    s2 = np.power(s, 2)
+    s2 = np.sum(s2)
+    
+    d2 = abs(s2 - t2)
+    
+    print("distance**2:", d2)
+    
+    return d2

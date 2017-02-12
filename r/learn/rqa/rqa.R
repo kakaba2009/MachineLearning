@@ -9,6 +9,8 @@ source('./mylib/mfractal.R')
 options(max.print=5.5E5)
 
 df <- loadSymbol('JPY=X')
+df$Time <- ComputeTimeDiff2(df)
+
 df <- df$Close
 ts <- as.ts(df)
 ts <- head(ts, n=500)
