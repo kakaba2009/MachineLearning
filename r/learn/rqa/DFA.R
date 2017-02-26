@@ -14,7 +14,7 @@ ts <- as.ts(df)
 ts <- head(ts, n=5000)
 
 ## calculate the scaling exponent for a ts
-DFA.walk <- DFA(ts, detrend="poly1", sum.order=1, verbose=TRUE)
+DFA.walk <- DFA(ts, detrend="poly1", sum.order=2, verbose=TRUE)
 ## print the results
 print(DFA.walk)
 ## plot a summary of the results

@@ -13,7 +13,7 @@ options(max.print=5.5E5)
 df <- loadSymbol('JPY=X')
 df <- df$Close
 ts <- as.ts(df)
-ts <- head(ts, n=50)
+ts <- head(ts, n=500)
 n  <- NROW(ts)
 
 ts <- ComputeChange(ts, k=1, type="arithmetic")
