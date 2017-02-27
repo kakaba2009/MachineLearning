@@ -14,11 +14,11 @@ df <- loadSymbol('JPY=X')
 #df$Close.Chg <- df$Close - shift(df$Close, n=1)
 df <- df$Close
 df <- tail(df, 1000)
+#df <- seq(1, 15)
 nr <- NROW(df)
 
-tar <- 975
-lib  <- c(1,     tar)
-pred <- c(tar+1, nr)
+lib  <- c(1, nr)
+pred <- c(1, nr+1) #To Predict Tomorrow
 
 BestE <- BestDimEDM(df, lib, pred, E=2:12)
 cat("BestE: ", BestE, "\n")
