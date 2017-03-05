@@ -9,44 +9,44 @@ modelSaved = "../model/JPYRMSPropLinear12x6xD6.h5"
 
 batch_size = 1000
 epochs_num = 1
-
-lag = 1
-dim = seqn_size = 6
 output_dim = 6
 
-np.random.seed(6) # fix random seed for reproducibility
+np.random.seed(6) # fix random seed
 
-dataset = mlstm.loadFXData('JPY=X', '../db/forex.db', 1000)
-dataset = dataset[['Close']]
-dataset = mcalc.m_pct(dataset, True)
-SCALE   = np.amax(dataset.values.flatten())
+ds = mlstm.loadFXData('JPY=X', '../db/forex.db', 1000)
+ds = ds[['Close']]
 
-T = mcalc.vector_delay_embed(dataset, dim, lag)
+P = mcalc.m_pct(ds, True)
+
+T = mcalc.vector_delay_embed(P, output_dim, 1)
 
 X, y = mcalc.split_x_y(T)
 
 def mshape(X):
+    # reshape input to be [samples, time steps, features]
     return np.reshape(X, (X.shape[0],  -1, X.shape[1])) 
 
-kf = KFold(n_splits=2, shuffle=False, random_state=None)
+kf = KFold(n_splits=3, shuffle=False, random_state=None)
 
 for train_index, test_index in kf.split(X):
     trainX, testX = X[train_index], X[test_index]
     trainY, testY = y[train_index], y[test_index]
     
-    trainX = normalize(trainX, norm='l2')
-    trainY = normalize(trainY, norm='l2')
-    # reshape input to be [samples, time steps, features]
-    trainX = np.reshape(trainX, (trainX.shape[0], -1, trainX.shape[1]))
+    #trainX = normalize(trainX, norm='l2')
+    #trainY = normalize(trainY, norm='l2')
+    #testX  = normalize(testX,  norm='l2')
+    #testY  = normalize(testY,  norm='l2')
+    
+    trainX = mshape(trainX)
     # create and fit the LSTM network
     if(loaded == False):
         model = mlstm.loadModel(modelSaved, batch_size, trainX.shape, loss='mean_squared_error', 
                       opt="RMSProp", stack=1, state=False, od=output_dim, act='linear', neurons=12)
         loaded = True
 
-    mlstm.trainModel(model, trainX, trainY, batch_size, epochs_num, modelSaved)
+    mlstm.trainModel(model, trainX, trainY, batch_size, epochs_num, modelSaved, validation=(mshape(testX), testY))
 
 # make predictions
 predict = model.predict(mshape(X), batch_size=batch_size)
-
-mlstm.plot_result_2F(y, predict, None, seqn_size)
+print(predict.shape, predict[:,-1])
+mlstm.plot_results(predict[:,-1], y[:,-1])

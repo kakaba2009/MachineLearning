@@ -199,10 +199,11 @@ def plot_result_1F(dataset, train, test, seqn_size):
     mng.window.showMaximized()
     plt.show()
 
-def trainModel(model, X, Y, batch_size, epochs, modelSaved):
+def trainModel(model, X, Y, batch_size, epochs, modelSaved, validation=None):
     for i in range(1):
-        hist = model.fit(X, Y, nb_epoch=epochs, batch_size=batch_size, verbose=2, shuffle=False, validation_split=0.05)
-        #print(hist.history)
+        hist = model.fit(X, Y, nb_epoch=epochs, batch_size=batch_size, verbose=2, shuffle=False, 
+                         validation_split=0.0, validation_data=validation)
+        print(hist.history)
         
         if(i > 1 and i % 2 == 0):
             saveModel(model, modelSaved)
@@ -311,7 +312,7 @@ def setupTrainTest(dataset, seqn_size, SCALE, LOG):
 def plot_results(predicted_data, true_data):
     fig = plt.figure(facecolor='white')
     ax = fig.add_subplot(111)
-    ax.plot(true_data, label='True Data')
+    ax.plot(true_data, label='True Value')
     plt.plot(predicted_data, label='Prediction')
     plt.legend()
     plt.show()
@@ -319,7 +320,7 @@ def plot_results(predicted_data, true_data):
 def plot_results_multiple(predicted_data, true_data, prediction_len):
     fig = plt.figure(facecolor='white')
     ax = fig.add_subplot(111)
-    ax.plot(true_data, label='True Data')
+    ax.plot(true_data, label='True Value')
     #Pad the list of predictions to shift it in the graph to it's correct start
     for i, data in enumerate(predicted_data):
         padding = [None for p in range(i * prediction_len)]
