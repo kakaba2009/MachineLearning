@@ -1,8 +1,13 @@
+import os
+import warnings
 import numpy as np
 import src.mylib.mcalc as mcalc
 import src.mylib.mlstm as mlstm
 from sklearn.preprocessing import normalize
 from sklearn.model_selection import KFold
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' #Hide messy TensorFlow warnings
+warnings.filterwarnings("ignore") #Hide messy Numpy warnings
 
 loaded = False
 modelSaved = "../model/JPYRMSPropLinear12x6xD6.h5"
