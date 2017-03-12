@@ -3,14 +3,18 @@ import warnings
 import numpy as np
 import src.mylib.mcalc as mcalc
 import src.mylib.mlstm as mlstm
+import theano.d3viz as d3v
 from sklearn.preprocessing import normalize
 from sklearn.model_selection import KFold
+from keras.utils.visualize_util import plot
+from keras import backend as K
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' #Hide messy TensorFlow warnings
 warnings.filterwarnings("ignore") #Hide messy Numpy warnings
 
 loaded = False
 modelSaved = "../model/JPYRMSPropLinear12x6xD6.h5"
+graphSaved = "../model/JPYRMSPropLinear12x6xD6.html"
 
 batch_size = 1000
 epochs_num = 1
@@ -50,6 +54,11 @@ for train_index, test_index in kf.split(X):
         loaded = True
 
     mlstm.trainModel(model, trainX, trainY, batch_size, epochs_num, modelSaved, validation=(mshape(testX), testY))
+
+#plot(model, to_file=graphSaved)
+get_last_layer_output = K.function([model.layers[0].input, K.learning_phase()], [model.layers[-1].output])
+print(get_last_layer_output)
+#d3v.d3viz(get_last_layer_output, graphSaved)
 
 # make predictions
 predict = model.predict(mshape(X), batch_size=batch_size)
