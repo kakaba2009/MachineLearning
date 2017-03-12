@@ -3,14 +3,18 @@ import warnings
 import numpy as np
 import src.mylib.mcalc as mcalc
 import src.mylib.mlstm as mlstm
+import tensorflow as tf
 import theano.d3viz as d3v
 from sklearn.preprocessing import normalize
 from sklearn.model_selection import KFold
 from keras.utils.visualize_util import plot
 from keras import backend as K
+from keras import callbacks
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' #Hide messy TensorFlow warnings
 warnings.filterwarnings("ignore") #Hide messy Numpy warnings
+
+tb = callbacks.TensorBoard(log_dir='../log', histogram_freq=1, write_graph=True, write_images=True)
 
 loaded = False
 modelSaved = "../model/JPYRMSPropLinear12x6xD6.h5"
@@ -53,14 +57,16 @@ for train_index, test_index in kf.split(X):
                       opt="RMSProp", stack=1, state=False, od=output_dim, act='linear', neurons=12)
         loaded = True
 
-    mlstm.trainModel(model, trainX, trainY, batch_size, epochs_num, modelSaved, validation=(mshape(testX), testY))
+    mlstm.trainModel(model, trainX, trainY, batch_size, epochs_num, modelSaved, validation=(mshape(testX), testY), cb=[tb])
 
+layer = K.function([model.layers[0].input, K.learning_phase()], [model.layers[-1].output])
+print(layer)
 #plot(model, to_file=graphSaved)
-get_last_layer_output = K.function([model.layers[0].input, K.learning_phase()], [model.layers[-1].output])
-print(get_last_layer_output)
 #d3v.d3viz(get_last_layer_output, graphSaved)
+tfGraph = K.get_session().graph
+print(tfGraph)
 
 # make predictions
 predict = model.predict(mshape(X), batch_size=batch_size)
-print(predict.shape, predict[:,-1])
+#print(predict.shape, predict[:,-1])
 mlstm.plot_results(predict[:,-1], y[:,-1])

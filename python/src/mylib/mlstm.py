@@ -199,10 +199,10 @@ def plot_result_1F(dataset, train, test, seqn_size):
     mng.window.showMaximized()
     plt.show()
 
-def trainModel(model, X, Y, batch_size, epochs, modelSaved, validation=None):
+def trainModel(model, X, Y, batch_size, epochs, modelSaved, validation=None, cb=None):
     for i in range(1):
         hist = model.fit(X, Y, nb_epoch=epochs, batch_size=batch_size, verbose=2, shuffle=False, 
-                         validation_split=0.0, validation_data=validation)
+                         validation_split=0.0, validation_data=validation, callbacks=cb)
         print(hist.history)
         
         if(i > 1 and i % 2 == 0):
