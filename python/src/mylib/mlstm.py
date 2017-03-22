@@ -6,17 +6,12 @@ import matplotlib.pyplot as plt
 import src.mylib.mfile as mfile
 import src.mylib.mcalc as mcalc
 from matplotlib import style
-from keras.models import Sequential
 from keras.utils import np_utils
-from keras.layers import Dense
-from keras.layers import LSTM
-from keras.models import load_model
-from keras.optimizers import Adam
-from keras.optimizers import RMSprop
-from keras.layers import Activation
-from keras.layers import TimeDistributed
-from sklearn.metrics import mean_squared_error
+from keras.optimizers import Adam, RMSprop
 from sklearn.preprocessing import MinMaxScaler
+from keras.models import Sequential, load_model
+from keras.layers.normalization import BatchNormalization
+from keras.layers import Dense, LSTM, Activation, Masking, TimeDistributed
 
 # convert an array of values into a dataset matrix
 def create_dataset(dataset, seqn_size=1):
@@ -97,6 +92,8 @@ def loadModel(filepath,batch_size,iShape,loss='categorical_crossentropy',opt='ad
 
 def createModel(batch_size,iShape,obj='mean_squared_error',opt='adam',stack=1,state=False,od=1,act='softmax',neurons=8):
     model = Sequential()
+    model.add(BatchNormalization())
+    model.add(Masking([0, 0, 0]))
     #shape input to be [samples, time steps, features]
     for i in range(stack):
         if(i == (stack -1)):
