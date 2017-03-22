@@ -11,7 +11,7 @@ from keras.optimizers import Adam, RMSprop
 from sklearn.preprocessing import MinMaxScaler
 from keras.models import Sequential, load_model
 from keras.layers.normalization import BatchNormalization
-from keras.layers import Dense, LSTM, Activation, Masking, TimeDistributed
+from keras.layers import Dense, LSTM, Activation, Masking, TimeDistributed, Dropout
 
 # convert an array of values into a dataset matrix
 def create_dataset(dataset, seqn_size=1):
@@ -92,8 +92,8 @@ def loadModel(filepath,batch_size,iShape,loss='categorical_crossentropy',opt='ad
 
 def createModel(batch_size,iShape,obj='mean_squared_error',opt='adam',stack=1,state=False,od=1,act='softmax',neurons=8):
     model = Sequential()
-    model.add(BatchNormalization())
-    model.add(Masking([0, 0, 0]))
+    #model.add(BatchNormalization(batch_input_shape=(batch_size, iShape[1], iShape[2])))
+    #model.add(Masking([0, 0, 0]))
     #shape input to be [samples, time steps, features]
     for i in range(stack):
         if(i == (stack -1)):
@@ -110,7 +110,8 @@ def createModel(batch_size,iShape,obj='mean_squared_error',opt='adam',stack=1,st
                 model.add(LSTM(output_dim=neurons, input_dim=iShape[2], stateful=state, return_sequences=True))
                           
             print("Added LSTM Layer@", i, "return_sequences=True")
-    
+
+    model.add(Dropout(0.2))
     model.add(Dense(output_dim=od))
     #model.add(TimeDistributed(Dense(output_dim=od)))
     print("Added Dense Layer")
