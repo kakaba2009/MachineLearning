@@ -93,3 +93,13 @@ ENV/
 
 # Eclipse metadata
 .metadata
+/c++/algorithm/bst/Debug
+/c++/algorithm/coins change/Debug
+/c++/algorithm/Debug
+/c++/algorithm/bstcsharp/bin/Debug
+/c++/algorithm/bstcsharp/obj/Debug
+/c++/algorithm/algorithm.VC.VC.opendb
+/c++/algorithm/algorithm.VC.db
+/c++/algorithm/coins change/coins change.vcxproj.filters
+/c++/algorithm/bst/bst.vcxproj.filters
+/c++/algorithm/.vs/algorithm/v14/.suo
