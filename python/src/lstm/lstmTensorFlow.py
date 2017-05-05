@@ -18,22 +18,22 @@ graphSaved = "../model/JPYRMSPropLinear12x6xD6.html"
 
 batch_size = 128
 epochs_num = 1
-output_dim = 6
+output_dim = 2
 
 np.random.seed(6)  # fix random seed
 
-ds = mlstm.loadFXData('JPY=X', '../db/forex.db', 1000)
+ds = mlstm.loadFXData('JPY=X', '../db/forex.db', 256)
 ds = ds[['Close']]
 
-P = mcalc.m_pct(ds, True)
-
-T = mcalc.vector_delay_embed(P, output_dim, 1)
+T = mcalc.vector_delay_embed(ds, output_dim, 1)
 
 X, Y = mcalc.split_x_y(T)
 
-def mshape(X):
+
+def mshape(x):
     # reshape input to be [samples, time steps, features]
-    return np.reshape(X, (X.shape[0],  -1, X.shape[1]))
+    return np.reshape(x, (x.shape[0],  -1, x.shape[1]))
+
 
 def variable_summaries(var):
     with tf.name_scope('summaries'):
@@ -56,51 +56,47 @@ display_step = 10
 n_steps  = 1   # timesteps
 n_hidden = 16  # hidden layer num of features
 
-# tf Graph input
-x = tf.placeholder("float", [None, n_steps, output_dim])
-#tf.summary.scalar("x", x)
-y = tf.placeholder("float", [None, output_dim])
-#tf.summary.scalar("y", y)
+with tf.name_scope('inputs'):
+    # tf Graph input
+    x = tf.placeholder("float", [None, n_steps, output_dim], name="x")
+    y = tf.placeholder("float", [None, output_dim], name="y")
 
-# Define weights
-weights = {
-    'out': tf.Variable(tf.random_normal([n_hidden, output_dim]))
-}
-biases = {
-    'out': tf.Variable(tf.random_normal([output_dim]))
-}
+    # Define weights
+    W = tf.Variable(tf.random_normal([n_hidden, output_dim]), name="weights")
+    B = tf.Variable(tf.random_normal([output_dim]), name="biases")
 
-def RNN(name, x, weights, biases):
+
+def rnn_layer(name, x1, weights, biases):
     with tf.name_scope(name):
         # Prepare data shape to match `rnn` function requirements
         # Current data input shape: (batch_size, n_steps, n_input)
         # Required shape: 'n_steps' tensors list of shape (batch_size, n_input)
 
         # Unstack to get a list of 'n_steps' tensors of shape (batch_size, n_input)
-        x = tf.unstack(x, n_steps, 1)
+        x1 = tf.unstack(x1, n_steps, 1)
 
         # Define a lstm cell with tensorflow
         lstm_cell = rnn.BasicLSTMCell(n_hidden, forget_bias=1.0)
 
         # Get lstm cell output
-        outputs, states = rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
+        outputs, states = rnn.static_rnn(lstm_cell, x1, dtype=tf.float32)
 
         # Linear activation, using rnn inner loop last output
-        model = tf.matmul(outputs[-1], weights['out']) + biases['out']
+        model = tf.matmul(outputs[-1], weights) + biases
         tf.summary.histogram(name, model)
         return model
 
-pred = RNN("lstm1", x, weights, biases)
-tf.summary.histogram("pred", pred)
+prediction = rnn_layer("lstm1", x, W, B)
+tf.summary.histogram("prediction", prediction)
 
 # Define loss and optimizer
-cost = tf.losses.mean_squared_error(labels=y, predictions=pred)
+cost = tf.losses.mean_squared_error(labels=y, predictions=prediction)
 tf.summary.scalar("cost", cost)
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 
 # Evaluate model
 # correct_pred = tf.equal(tf.argmax(pred,1), tf.argmax(y,1))
-accuracy = tf.contrib.metrics.streaming_mean_squared_error (pred, y)
+accuracy = tf.contrib.metrics.streaming_mean_squared_error (prediction, y)
 
 # Initializing the variables
 init = tf.global_variables_initializer()
