@@ -16,9 +16,18 @@ loaded = False
 modelSaved = "../model/JPYRMSPropLinear12x6xD6.h5"
 graphSaved = "../model/JPYRMSPropLinear12x6xD6.html"
 
-batch_size = 128
+BATCH_START = 0     # 建立 batch data 时候的 index
+batch_size = 16
 epochs_num = 1
 output_dim = 2
+
+# Parameters
+learning_rate = 0.001
+display_step = 10
+
+# Network Parameters
+n_steps  = 10  # timesteps
+n_hidden = 16  # hidden layer num of features
 
 np.random.seed(6)  # fix random seed
 
@@ -27,8 +36,16 @@ ds = ds[['Close']]
 
 T = mcalc.vector_delay_embed(ds, output_dim, 1)
 
-X, Y = mcalc.split_x_y(T)
 
+def get_batch(ds):
+    global BATCH_START
+    values = ds.values
+    # xs shape (50batch, 20steps)
+    T = values[BATCH_START:BATCH_START+n_steps*batch_size].reshape((batch_size, n_steps))
+    X, Y = mcalc.split_x_y(T)
+    BATCH_START += BATCH_START+n_steps*batch_size
+    # returned seq, res and xs: shape (batch, step, input)
+    return [X, Y]
 
 def mshape(x):
     # reshape input to be [samples, time steps, features]
@@ -47,14 +64,6 @@ def variable_summaries(var):
         tf.summary.histogram('histogram', var)
 
 kf = KFold(n_splits=3, shuffle=False, random_state=None)
-
-# Parameters
-learning_rate = 0.001
-display_step = 10
-
-# Network Parameters
-n_steps  = 1   # timesteps
-n_hidden = 16  # hidden layer num of features
 
 with tf.name_scope('inputs'):
     # tf Graph input
@@ -108,7 +117,7 @@ with tf.Session() as sess:
     step = 1
     # Keep training until reach max iterations
     while step <= epochs_num:
-        batch_x, batch_y = X, Y
+        batch_x, batch_y = get_batch(ds)
         # Reshape data to get 1 seq of 6 elements
         batch_x = mshape(batch_x)
         # Run optimization op (backprop)

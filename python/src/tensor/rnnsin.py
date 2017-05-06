@@ -136,4 +136,3 @@ if __name__ == '__main__':
         # 打印 cost 结果
         if i % 20 == 0:
             print('cost: ', round(cost, 4))
-
