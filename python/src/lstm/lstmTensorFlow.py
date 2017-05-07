@@ -22,7 +22,7 @@ modelSaved = "../model/JPYRMSPropLinear12x6xD6.h5"
 
 SEQLEN = 5
 BATCHSIZE = 10
-output_dim = 5
+output_dim = 1
 CELLSIZE = 16
 NLAYERS = 1
 learning_rate = 0.001  # fixed learning rate
@@ -33,40 +33,6 @@ ds = mlstm.loadFXData('JPY=X', '../db/forex.db', 101)
 ds = ds[['Close']]
 
 #T = mcalc.vector_delay_embed(ds, output_dim, 1)
-
-
-def rnn_minibatch_sequencer(raw_data, batch_size, sequence_size, nb_epochs):
-    """
-    Divides the data into batches of sequences so that all the sequences in one batch
-    continue in the next batch. This is a generator that will keep returning batches
-    until the input data has been seen nb_epochs times. Sequences are continued even
-    between epochs, apart from one, the one corresponding to the end of raw_data.
-    The remainder at the end of raw_data that does not fit in an full batch is ignored.
-    :param raw_data: the training text
-    :param batch_size: the size of a training minibatch
-    :param sequence_size: the unroll size of the RNN
-    :param nb_epochs: number of epochs to train on
-    :return:
-        x: one batch of training sequences
-        y: on batch of target sequences, i.e. training sequences shifted by 1
-        epoch: the current epoch number (starting at 0)
-    """
-    data = np.array(raw_data)
-    data_len = data.shape[0]
-    # using (data_len-1) because we must provide for the sequence shifted by 1 too
-    nb_batches = (data_len - 1) // (batch_size * sequence_size)
-    assert nb_batches > 0, "Not enough data, even for a single batch. Try using a smaller batch_size."
-    rounded_data_len = nb_batches * batch_size * sequence_size
-    xdata = np.reshape(data[0:rounded_data_len], [batch_size, nb_batches * sequence_size])
-    ydata = np.reshape(data[1:rounded_data_len + 1], [batch_size, nb_batches * sequence_size])
-
-    for epoch in range(nb_epochs):
-        for batch in range(nb_batches):
-            x = xdata[:, batch * sequence_size:(batch + 1) * sequence_size]
-            y = ydata[:, batch * sequence_size:(batch + 1) * sequence_size]
-            x = np.roll(x, -epoch, axis=0)  # to continue the text from epoch to epoch (do not reset rnn state!)
-            y = np.roll(y, -epoch, axis=0)
-            yield x, y, epoch
 
 def mshape(x):
     # reshape input to be [samples, time steps, features]
@@ -80,38 +46,38 @@ batchsize = tf.placeholder(tf.int32, name='batchsize')
 
 # inputs
 X = tf.placeholder(tf.float32, [None, SEQLEN], name='X')    # [ BATCHSIZE, SEQLEN ]
-Xo = X
+Xo = tf.reshape(X, [-1, SEQLEN, output_dim])    # [ BATCHSIZE, SEQLEN, output_dim ]
 # expected outputs = same sequence shifted by 1 since we are trying to predict the next character
 Y_ = tf.placeholder(tf.float32, [None, SEQLEN], name='Y_')  # [ BATCHSIZE, SEQLEN ]
-Yo_ = Y_
+Yo_ = tf.reshape(Y_, [-1, SEQLEN, output_dim])  # [ BATCHSIZE, SEQLEN, output_dim ]
 # input state
-Hin = tf.placeholder(tf.float32, [None, CELLSIZE * NLAYERS], name='Hin')  # [ BATCHSIZE, INTERNALSIZE * NLAYERS]
+Hin = tf.placeholder(tf.float32, [None, CELLSIZE * NLAYERS], name='Hin')  # [ BATCHSIZE, CELLSIZE * NLAYERS]
 
 # using a NLAYERS=1 layers of GRU cells, unrolled SEQLEN=5 times
-# dynamic_rnn infers SEQLEN from the size of the inputs Xo
+# dynamic_rnn infers SEQLEN from the size of the inputs X
 
 onecell = rnn.GRUCell(CELLSIZE)
 dropcell = rnn.DropoutWrapper(onecell, input_keep_prob=pkeep)
 multicell = rnn.MultiRNNCell([dropcell]*NLAYERS, state_is_tuple=False)
 multicell = rnn.DropoutWrapper(multicell, output_keep_prob=pkeep)
-Yr, H = tf.nn.dynamic_rnn(multicell, Xo, dtype=tf.float32, initial_state=Hin)
-# Yr: [ BATCHSIZE, SEQLEN, INTERNALSIZE ]
-# H:  [ BATCHSIZE, INTERNALSIZE*NLAYERS ] # this is the last state in the sequence
+Yr, H = tf.nn.dynamic_rnn(multicell, Xo, dtype=tf.float32, initial_state=Hin, time_major=False)
+# Yr: [ BATCHSIZE, SEQLEN, CELLSIZE ]
+# H:  [ BATCHSIZE, CELLSIZE*NLAYERS ] # this is the last state in the sequence
 
 H = tf.identity(H, name='H')  # just to give it a name
 
 # Softmax layer implementation:
-# Flatten the first two dimension of the output [ BATCHSIZE, SEQLEN, ALPHASIZE ] => [ BATCHSIZE x SEQLEN, ALPHASIZE ]
+# Flatten the first two dimension of the output [ BATCHSIZE, SEQLEN, output_dim ] => [ BATCHSIZE x SEQLEN, output_dim ]
 # then apply softmax readout layer. This way, the weights and biases are shared across unrolled time steps.
 # From the readout point of view, a value coming from a cell or a minibatch is the same thing
 
-Yflat = tf.reshape(Yr, [-1, CELLSIZE])    # [ BATCHSIZE x SEQLEN, INTERNALSIZE ]
-Ylogits = tf.contrib.layers.fully_connected(Yflat, output_dim)     # [ BATCHSIZE x SEQLEN, ALPHASIZE ]
-Yflat_ = tf.reshape(Yo_, [-1, output_dim])     # [ BATCHSIZE x SEQLEN, ALPHASIZE ]
+Yflat = tf.reshape(Yr, [-1, CELLSIZE])    # [ BATCHSIZE x SEQLEN, CELLSIZE ]
+Ylogits = tf.contrib.layers.fully_connected(Yflat, output_dim)     # [ BATCHSIZE x SEQLEN, output_dim ]
+Yflat_ = tf.reshape(Y_, [-1, output_dim])     # [ BATCHSIZE x SEQLEN, output_dim ]
 loss = tf.losses.mean_squared_error(predictions=Ylogits, labels=Yflat_)  # [ BATCHSIZE x SEQLEN ]
 loss = tf.reshape(loss, [batchsize, -1])      # [ BATCHSIZE, SEQLEN ]
-Yo = Ylogits   # [ BATCHSIZE x SEQLEN, ALPHASIZE ]
-Y = tf.reshape(Yo, [batchsize, -1], name="Y")  # [ BATCHSIZE, SEQLEN ]
+Y = Ylogits   # [ BATCHSIZE x SEQLEN, output_dim ]
+Y = tf.reshape(Y, [batchsize, -1], name="Y")  # [ BATCHSIZE, SEQLEN ]
 train_step = tf.train.AdamOptimizer(lr).minimize(loss)
 
 # Define loss and optimizer
@@ -152,7 +118,7 @@ sess.run(init)
 step = 0
 
 # training loop
-for x, y_, epoch in rnn_minibatch_sequencer(ds.values, BATCHSIZE, SEQLEN, nb_epochs=epochs_num):
+for x, y_, epoch in utl.rnn_minibatch_sequencer(ds.values, BATCHSIZE, SEQLEN, nb_epochs=epochs_num):
     # train on one minibatch
     feed_dict = {X: x, Y_: y_, Hin: istate, lr: learning_rate, pkeep: dropout_pkeep, batchsize: BATCHSIZE}
     _, y, ostate, smm = sess.run([train_step, Y, H, summaries], feed_dict=feed_dict)
