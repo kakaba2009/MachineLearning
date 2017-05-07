@@ -6,7 +6,6 @@ import math
 import warnings
 import numpy as np
 import tensorflow as tf
-import src.mylib.mcalc as mcalc
 import src.mylib.mlstm as mlstm
 import src.mylib.mutils as utl
 from tensorflow.contrib import rnn
@@ -31,8 +30,8 @@ epochs_num = 1
 
 ds = mlstm.loadFXData('JPY=X', '../db/forex.db', 101)
 ds = ds[['Close']]
-
-#T = mcalc.vector_delay_embed(ds, output_dim, 1)
+ds = ds.values
+ds = np.reshape(ds, -1)
 
 def mshape(x):
     # reshape input to be [samples, time steps, features]
@@ -75,9 +74,7 @@ Yflat = tf.reshape(Yr, [-1, CELLSIZE])    # [ BATCHSIZE x SEQLEN, CELLSIZE ]
 Ylogits = tf.contrib.layers.fully_connected(Yflat, output_dim)     # [ BATCHSIZE x SEQLEN, output_dim ]
 Yflat_ = tf.reshape(Y_, [-1, output_dim])     # [ BATCHSIZE x SEQLEN, output_dim ]
 loss = tf.losses.mean_squared_error(predictions=Ylogits, labels=Yflat_)  # [ BATCHSIZE x SEQLEN ]
-loss = tf.reshape(loss, [batchsize, -1])      # [ BATCHSIZE, SEQLEN ]
 Y = Ylogits   # [ BATCHSIZE x SEQLEN, output_dim ]
-Y = tf.reshape(Y, [batchsize, -1], name="Y")  # [ BATCHSIZE, SEQLEN ]
 train_step = tf.train.AdamOptimizer(lr).minimize(loss)
 
 # Define loss and optimizer
@@ -86,9 +83,9 @@ train_step = tf.train.AdamOptimizer(lr).minimize(loss)
 #optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 
 # stats for display
-seqloss = tf.reduce_mean(loss, 1)
+seqloss = tf.reduce_mean(loss)
 batchloss = tf.reduce_mean(seqloss)
-accuracy = tf.reduce_mean(tf.metrics.mean_squared_error(Y_, Y))
+accuracy = tf.reduce_mean(loss)
 loss_summary = tf.summary.scalar("batch_loss", batchloss)
 acc_summary = tf.summary.scalar("batch_accuracy", accuracy)
 summaries = tf.summary.merge([loss_summary, acc_summary])
@@ -118,7 +115,7 @@ sess.run(init)
 step = 0
 
 # training loop
-for x, y_, epoch in utl.rnn_minibatch_sequencer(ds.values, BATCHSIZE, SEQLEN, nb_epochs=epochs_num):
+for x, y_, epoch in utl.rnn_minibatch_sequencer(ds, BATCHSIZE, SEQLEN, nb_epochs=epochs_num):
     # train on one minibatch
     feed_dict = {X: x, Y_: y_, Hin: istate, lr: learning_rate, pkeep: dropout_pkeep, batchsize: BATCHSIZE}
     _, y, ostate, smm = sess.run([train_step, Y, H, summaries], feed_dict=feed_dict)
