@@ -19,16 +19,16 @@ tf.set_random_seed(0)  # fix random seed
 loaded = False
 modelSaved = "../model/JPYRMSPropLinear12x6xD6.h5"
 
-SEQLEN = 5
+SEQLEN = 2
 BATCHSIZE = 10
 output_dim = 1
 CELLSIZE = 16
 NLAYERS = 1
 learning_rate = 0.001  # fixed learning rate
 dropout_pkeep = 1.0    # no dropout
-epochs_num = 1
+epochs_num = 10
 
-ds = mlstm.loadFXData('JPY=X', '../db/forex.db', 101)
+ds = mlstm.loadFXData('JPY=X', '../db/forex.db', 21)
 ds = ds[['Close']]
 ds = ds.values
 ds = np.reshape(ds, -1)
@@ -142,8 +142,8 @@ for x, y_, epoch in utl.rnn_minibatch_sequencer(ds, BATCHSIZE, SEQLEN, nb_epochs
     if step // 10 % _50_BATCHES == 0:
         saver.save(sess, 'checkpoints/rnn_train_' + timestamp, global_step=step)
 
-    # display progress bar
-    print(step)
+    print("x", x)
+    print("y_", y_)
 
     # loop state around
     istate = ostate
