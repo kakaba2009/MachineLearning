@@ -7,88 +7,54 @@ import warnings
 import numpy as np
 import tensorflow as tf
 import src.mylib.mlstm as mlstm
-import src.mylib.mutils as utl
-from tensorflow.contrib import rnn
-from sklearn.model_selection import KFold
+import src.mylib.mcalc as mcalc
+import matplotlib.pyplot as plt
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Hide messy TensorFlow warnings
 warnings.filterwarnings("ignore")  # Hide messy Numpy warnings
 
 tf.set_random_seed(0)  # fix random seed
 
-loaded = False
-modelSaved = "../model/JPYRMSPropLinear12x6xD6.h5"
+# Hyper Parameters
+BATCHSIZE = 50
+TIME_STEP = 10      # rnn time step
+INPUT_SIZE = 1      # rnn input size
+CELL_SIZE = 32      # rnn cell size
+LR = 0.001          # learning rate
 
-SEQLEN = 2
-BATCHSIZE = 10
-output_dim = 1
-CELLSIZE = 16
-NLAYERS = 1
-learning_rate = 0.001  # fixed learning rate
-dropout_pkeep = 1.0    # no dropout
-epochs_num = 10
-
-ds = mlstm.loadFXData('JPY=X', '../db/forex.db', 21)
+ds = mlstm.loadFXData('JPY=X', '../db/forex.db', 1000)
+ds = mlstm.loadFXData('JPY=X', '../db/forex.db', 1000)
 ds = ds[['Close']]
-ds = ds.values
-ds = np.reshape(ds, -1)
+ds = mcalc.vector_delay_embed(ds, INPUT_SIZE, 1)
 
-def mshape(x):
+S, T = mcalc.split_x_y(ds)
+
+total = S.shape[0]
+batch = int(np.round(total / BATCHSIZE))
+
+def mshape(X):
     # reshape input to be [samples, time steps, features]
-    return np.reshape(x, (x.shape[0],  -1, x.shape[1]))
+    return np.reshape(X, (-1,  TIME_STEP, X.shape[1]))
 
-kf = KFold(n_splits=3, shuffle=False, random_state=None)
+# tensorflow placeholders
+tf_x = tf.placeholder(tf.float32, [None, TIME_STEP, INPUT_SIZE])        # shape(batch, 5, 1)
+tf_y = tf.placeholder(tf.float32, [None, TIME_STEP, INPUT_SIZE])        # input y
 
-lr = tf.placeholder(tf.float32, name='lr')  # learning rate
-pkeep = tf.placeholder(tf.float32, name='pkeep')  # dropout parameter
-batchsize = tf.placeholder(tf.int32, name='batchsize')
+# RNN
+rnn_cell = tf.contrib.rnn.BasicRNNCell(num_units=CELL_SIZE)
+init_s = rnn_cell.zero_state(batch_size=1, dtype=tf.float32)    # very first hidden state
+outputs, final_s = tf.nn.dynamic_rnn(
+    rnn_cell,                   # cell you have chosen
+    tf_x,                       # input
+    initial_state=init_s,       # the initial hidden state
+    time_major=False,          # False: (batch, time step, input); True: (time step, batch, input)
+)
+outs2D = tf.reshape(outputs, [-1, CELL_SIZE])                       # reshape 3D output to 2D for fully connected layer
+net_outs2D = tf.layers.dense(outs2D, INPUT_SIZE)
+outs = tf.reshape(net_outs2D, [-1, TIME_STEP, INPUT_SIZE])          # reshape back to 3D
 
-# inputs
-X = tf.placeholder(tf.float32, [None, SEQLEN], name='X')    # [ BATCHSIZE, SEQLEN ]
-Xo = tf.reshape(X, [-1, SEQLEN, output_dim])    # [ BATCHSIZE, SEQLEN, output_dim ]
-# expected outputs = same sequence shifted by 1 since we are trying to predict the next character
-Y_ = tf.placeholder(tf.float32, [None, SEQLEN], name='Y_')  # [ BATCHSIZE, SEQLEN ]
-Yo_ = tf.reshape(Y_, [-1, SEQLEN, output_dim])  # [ BATCHSIZE, SEQLEN, output_dim ]
-# input state
-Hin = tf.placeholder(tf.float32, [None, CELLSIZE * NLAYERS], name='Hin')  # [ BATCHSIZE, CELLSIZE * NLAYERS]
-
-# using a NLAYERS=1 layers of GRU cells, unrolled SEQLEN=5 times
-# dynamic_rnn infers SEQLEN from the size of the inputs X
-
-onecell = rnn.GRUCell(CELLSIZE)
-dropcell = rnn.DropoutWrapper(onecell, input_keep_prob=pkeep)
-multicell = rnn.MultiRNNCell([dropcell]*NLAYERS, state_is_tuple=False)
-multicell = rnn.DropoutWrapper(multicell, output_keep_prob=pkeep)
-Yr, H = tf.nn.dynamic_rnn(multicell, Xo, dtype=tf.float32, initial_state=Hin, time_major=False)
-# Yr: [ BATCHSIZE, SEQLEN, CELLSIZE ]
-# H:  [ BATCHSIZE, CELLSIZE*NLAYERS ] # this is the last state in the sequence
-
-H = tf.identity(H, name='H')  # just to give it a name
-
-# Softmax layer implementation:
-# Flatten the first two dimension of the output [ BATCHSIZE, SEQLEN, output_dim ] => [ BATCHSIZE x SEQLEN, output_dim ]
-# then apply softmax readout layer. This way, the weights and biases are shared across unrolled time steps.
-# From the readout point of view, a value coming from a cell or a minibatch is the same thing
-
-Yflat = tf.reshape(Yr, [-1, CELLSIZE])    # [ BATCHSIZE x SEQLEN, CELLSIZE ]
-Ylogits = tf.contrib.layers.fully_connected(Yflat, output_dim)     # [ BATCHSIZE x SEQLEN, output_dim ]
-Yflat_ = tf.reshape(Y_, [-1, output_dim])     # [ BATCHSIZE x SEQLEN, output_dim ]
-loss = tf.losses.mean_squared_error(predictions=Ylogits, labels=Yflat_)  # [ BATCHSIZE x SEQLEN ]
-Y = Ylogits   # [ BATCHSIZE x SEQLEN, output_dim ]
-train_step = tf.train.AdamOptimizer(lr).minimize(loss)
-
-# Define loss and optimizer
-#cost = tf.losses.mean_squared_error(labels=y, predictions=prediction)
-#tf.summary.scalar("cost", cost)
-#optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
-
-# stats for display
-seqloss = tf.reduce_mean(loss)
-batchloss = tf.reduce_mean(seqloss)
-accuracy = tf.reduce_mean(loss)
-loss_summary = tf.summary.scalar("batch_loss", batchloss)
-acc_summary = tf.summary.scalar("batch_accuracy", accuracy)
-summaries = tf.summary.merge([loss_summary, acc_summary])
+loss = tf.losses.mean_squared_error(labels=tf_y, predictions=outs)  # compute cost
+train_op = tf.train.AdamOptimizer(LR).minimize(loss)
 
 # Init Tensorboard stuff. This will save Tensorboard information into a different
 # folder at each run named 'log/<timestamp>/'. Two sets of data are saved so that
@@ -103,48 +69,34 @@ if not os.path.exists("checkpoints"):
     os.mkdir("checkpoints")
 saver = tf.train.Saver(max_to_keep=1)
 
-# for display: init the progress bar
-DISPLAY_FREQ = 50
-_50_BATCHES = DISPLAY_FREQ * BATCHSIZE * SEQLEN
-
-# init
-istate = np.zeros([BATCHSIZE, CELLSIZE * NLAYERS])  # initial zero input state
-init = tf.global_variables_initializer()
 sess = tf.Session()
-sess.run(init)
-step = 0
+sess.run(tf.global_variables_initializer())     # initialize var in graph
+#summary_writer.add_summary(sess)
 
-# training loop
-for x, y_, epoch in utl.rnn_minibatch_sequencer(ds, BATCHSIZE, SEQLEN, nb_epochs=epochs_num):
-    # train on one minibatch
-    feed_dict = {X: x, Y_: y_, Hin: istate, lr: learning_rate, pkeep: dropout_pkeep, batchsize: BATCHSIZE}
-    _, y, ostate, smm = sess.run([train_step, Y, H, summaries], feed_dict=feed_dict)
+for epoch in range(10):
+    for b in range(batch):
+        start, end = b*(BATCHSIZE*TIME_STEP), (b+1)*(BATCHSIZE*TIME_STEP)   # time range
+        if end >= total:
+            end = total
+        steps = np.linspace(start, end)
+        x = S[start:end, ]  # shape (batch*time_step, input_size)
+        y = T[start:end, ]  # shape (batch*time_step, input_size)
 
-    # save training data for Tensorboard
-    summary_writer.add_summary(smm, step)
+        x = mshape(x)  # shape (batch, time_step, input_size)
+        y = mshape(y)  # shape (batch, time_step, input_size)
 
-    # display a visual validation of progress (every 50 batches)
-    if step % _50_BATCHES == 0:
-        feed_dict = {X: x, Y_: y_, Hin: istate, pkeep: 1.0, batchsize: BATCHSIZE}  # no dropout for validation
-        y, l, bl, acc = sess.run([Y, seqloss, batchloss, accuracy], feed_dict=feed_dict)
+        if 'final_s_' not in globals():                 # first state, no any hidden state
+            feed_dict = {tf_x: x, tf_y: y}
+        else:                                           # has hidden state, so pass it to rnn
+            feed_dict = {tf_x: x, tf_y: y, init_s: final_s_}
+        _, pred_, final_s_ = sess.run([train_op, outs, final_s], feed_dict)     # train
 
-    # run a validation step every 50 batches
-    # The validation text should be a single sequence but that's too slow (1s per 1024 chars!),
-    # so we cut it up and batch the pieces (slightly inaccurate)
-    # tested: validating with 5K sequences instead of 1K is only slightly more accurate, but a lot slower.
-    if step % _50_BATCHES == 0:
-        ls, acc, smm = sess.run([batchloss, accuracy, summaries], feed_dict=feed_dict)
-        utl.print_validation_stats(ls, acc)
-        # save validation data for Tensorboard
-        validation_writer.add_summary(smm, step)
+        # plotting
+        plt.plot(steps, y.flatten(), 'r-')
+        plt.plot(steps, pred_.flatten(), 'b-')
+        plt.ylim((-1.2, 1.2))
+        plt.draw()
+        plt.pause(0.05)
 
-    # save a checkpoint (every 500 batches)
-    if step // 10 % _50_BATCHES == 0:
-        saver.save(sess, 'checkpoints/rnn_train_' + timestamp, global_step=step)
-
-    print("x", x)
-    print("y_", y_)
-
-    # loop state around
-    istate = ostate
-    step += BATCHSIZE * SEQLEN
+plt.ioff()
+plt.show()
