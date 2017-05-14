@@ -76,8 +76,8 @@ sess.run(tf.global_variables_initializer())     # initialize var in graph
 for epoch in range(10):
     for b in range(batch):
         start, end = b*(BATCHSIZE*TIME_STEP), (b+1)*(BATCHSIZE*TIME_STEP)   # time range
-        if end >= total:
-            end = total
+        if end > total:
+            end = total-1
         steps = np.linspace(start, end)
         x = S[start:end, ]  # shape (batch*time_step, input_size)
         y = T[start:end, ]  # shape (batch*time_step, input_size)
