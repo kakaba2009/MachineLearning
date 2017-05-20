@@ -17,14 +17,13 @@ warnings.filterwarnings("ignore")  # Hide messy Numpy warnings
 tf.set_random_seed(0)  # fix random seed
 
 # Hyper Parameters
-EPOCHSIZE = 5
-BATCHSIZE = 10
+EPOCHSIZE = 25      # rnn epoch size
+BATCHSIZE = 10      # rnn batch size
 TIME_STEP = 5       # rnn time step
 FEATURES = 1        # rnn input size
 CELL_SIZE = 32      # rnn cell size
 LR = 0.001          # learning rate
 
-ds = mlstm.loadFXData('JPY=X', '../db/forex.db', 1000)
 ds = mlstm.loadFXData('JPY=X', '../db/forex.db', 1000)
 ds = ds[['Close']].values
 
@@ -68,6 +67,8 @@ merged = tf.summary.merge_all()
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())     # initialize var in graph
+    saver.restore(sess, "checkpoints/lstmTensorFlow.ckpt")
+    print("lstmTensorFlow.ckpt restored")
 
     summary_writer = tf.summary.FileWriter("../log/", sess.graph)
 
@@ -102,6 +103,8 @@ with tf.Session() as sess:
             #plt.plot(pred_.flatten(), 'b-')
             #plt.draw()
             #plt.pause(0.05)
+        save_path = saver.save(sess, "checkpoints/lstmTensorFlow.ckpt")
+        print("checkpoints saved:", save_path)
 
     #plt.ioff()
     #plt.show()
