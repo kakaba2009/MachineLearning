@@ -1,3 +1,4 @@
+#!/bin/python3
 import sys
 def DFS(graph, start):
     L = 0
