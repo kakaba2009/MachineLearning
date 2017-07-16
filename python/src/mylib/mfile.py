@@ -73,6 +73,20 @@ def loadAndAppend():
 def loadOneSymbol(symbol, db="db/forex.db"):
     dfs = loadAll(db, dropDate=False)
     dfs = dfs.groupby("Symbol")
-    df  = dfs.get_group(symbol).drop("Symbol",axis=1)
+    df  = dfs.get_group(symbol).drop("Symbol", axis=1)
     
+    return df
+
+
+def loadClose(symbol, path):
+    con = create_engine('sqlite:///' + path)
+
+    query = 'SELECT Date, Close FROM FX WHERE Symbol = ' + "'" + symbol + "'"
+
+    df = pd.read_sql_query(query, con, index_col="Date", parse_dates=["Date"])
+
+    # df = df.to_period(freq ="D")
+
+    #df = df.drop("Volume", axis=1)
+
     return df
