@@ -1,4 +1,5 @@
 library(timeSeries)
+library(lubridate)
 library(quantmod)
 library(Quandl)
 library(DBI)

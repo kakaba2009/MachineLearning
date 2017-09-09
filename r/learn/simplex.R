@@ -6,7 +6,7 @@ source('./mylib/mtool.R')
 
 options(max.print=5.5E5)
 
-start = "1990-01-01"
+start = as.Date("1990-01-01")
 
 #df <- getQuandl("CURRFX/USDJPY", "daily", start, "raw")
 #df <- getQuandl("CHRIS/CME_GC1", "daily", start, "raw")
