@@ -13,12 +13,15 @@ qian =int('111111', 2) #101010 I Ching 01
 kun  =int('000000', 2) #101010 I Ching 02
 
 df = mfile.loadOneSymbol("JPY=X", "../db/forex.db")
-df = df.reset_index(drop=True)
+def dateToDouble(d):
+    return d.year * 10000.0 + d.month * 100.0 + d.day
+df.index = df.index.map(dateToDouble)
+#df = df.reset_index(drop=True)
 df = df['Close']
-df = df[-1000:]
+#df = df[-1000:]
 df = df.diff()
 df = df.dropna()
-fn = lambda x: (1.0 if x > 0 else 0.0)
+fn = lambda x: (1.0 if x > 0.0 else 0.0)
 xx = df.apply(fn)
 xx = xx.values
 ln = len(xx)
