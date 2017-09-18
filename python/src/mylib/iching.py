@@ -34,11 +34,24 @@ def getHexgram(dat, p = False):
         print(yy.values)
     return yy
 
-def plot(yy, dat):
+def plot(yy, dat, ratio = 0.5):
     zz = yy.copy()
     zz[zz != stop] = np.nan
     style.use('ggplot')
     plt.plot(yy.index, yy)
     plt.plot(zz.index, zz, "bo")
-    plt.plot(dat.index, dat['Close'] / 2.0)
+    plt.plot(dat.index, dat['Close'] * ratio)
     plt.show()
+
+def searchPattern(yy, pattern, length, psize):
+    def fMatch(a, **kwargs):
+        for i in range(0, length - psize + 1, 1):
+            p1 = pattern[i:i + psize]
+            rv = np.sqrt(np.sum((a - p1) ** 2))
+            if rv == 0:
+                print(a)
+                return 0
+        return 1
+
+    rv = yy.rolling(psize).apply(fMatch)
+    print(rv.values)

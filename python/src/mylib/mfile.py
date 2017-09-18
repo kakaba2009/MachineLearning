@@ -22,7 +22,7 @@ def loadData(symbol, path):
     
     return df
 
-def loadStock(symbol, path="markets.db"):
+def loadStock(symbol, path="Dow.db"):
     con = create_engine('sqlite:///' + path)
 
     query1 = 'SELECT Date, Open, High, Low, Close, Volume, "Adj Close" FROM NYSE WHERE Symbol = ' + "'" + symbol + "'"
@@ -33,19 +33,19 @@ def loadStock(symbol, path="markets.db"):
 
     return df
 
-def loadSymbolList(path):
+def loadSymbolList(path, db = 'FX'):
     con = create_engine('sqlite:///' + path)
 
-    query ="""SELECT DISTINCT Symbol FROM FX"""
+    query ="""SELECT DISTINCT Symbol FROM """ + db
 
     df = pd.read_sql_query(query, con)
     
     return df
 
-def loadAll(path, dropDate):
+def loadAll(path, db = 'FX', dropDate=False):
     con = create_engine('sqlite:///' + path)
 
-    query = 'SELECT Symbol, Date, Open, High, Low, Close FROM FX'
+    query = 'SELECT Symbol, Date, Open, High, Low, Close FROM ' + db
 
     df = pd.read_sql_query(query, con, index_col ="Date", parse_dates=["Date"])
     
@@ -70,8 +70,8 @@ def loadAndAppend():
 
     return dfs
 
-def loadOneSymbol(symbol, db="db/forex.db"):
-    dfs = loadAll(db, dropDate=False)
+def loadOneSymbol(symbol, db="db/forex.db", sub = 'FX'):
+    dfs = loadAll(db, sub, dropDate=False)
     dfs = dfs.groupby("Symbol")
     df  = dfs.get_group(symbol).drop("Symbol", axis=1)
     

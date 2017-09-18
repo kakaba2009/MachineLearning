@@ -8,24 +8,15 @@ import src.mylib.iching as iching
 #pattern = [19.,  38.,  12.,  24.,  49.,  35.,  6.,  12.,  25.,  50.,  36., 9.,  19.,  39.,  15.,  30.,  60.]
 psize   = 9
 
-dat = mfile.loadOneSymbol("JPY=X", "../db/forex.db")
+dat = mfile.loadOneSymbol("AAPL", "../db/Dow.db", 'Stocks')
+ydt = mcalc.m_sample_y(dat)
 
-yy = iching.getHexgram(mcalc.m_sample_y(dat))
+yy = iching.getHexgram(ydt)
+iching.plot(yy, ydt, 1)
 pattern = yy.dropna().values
-num     = len(pattern)
+length  = len(pattern)
 
 #dat = mcalc.m_sample_w(dat)
 yy = iching.getHexgram(dat)
-#iching.plot(y1, dat)
 
-def fMatch(a, **kwargs):
-    for i in range(0, num-psize+1, 1):
-        p1 = pattern[i:i+psize]
-        rv = np.sqrt(np.sum((a - p1)**2))
-        if rv == 0:
-            print(a)
-            return 0
-    return 1
-
-rv = yy.rolling(psize).apply(fMatch)
-print(rv.values)
+iching.searchPattern(yy, pattern, length, psize)

@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 
 SITE = "http://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+SITE = "https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average"
 START = datetime(1900, 1, 1, 0, 0, 0, 0, pytz.utc)
 END = datetime.today().utcnow()
 
