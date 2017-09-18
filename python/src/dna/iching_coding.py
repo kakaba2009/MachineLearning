@@ -1,42 +1,31 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import src.mylib.mfile as mfile
-from matplotlib import style
+import src.mylib.mcalc as mcalc
+import src.mylib.iching as iching
 
-stop =int('101010', 2) #101010 I Ching 63 After Completion
-befo =int('010101', 2) #101010 I Ching 64 Before Completion
-
-guai =int('111110', 2) #101010 I Ching 43
-
-qian =int('111111', 2) #101010 I Ching 01
-kun  =int('000000', 2) #101010 I Ching 02
-
-def dateToDouble(d):
-    return (d.year * 10000.0 + d.month * 100.0 + d.day) / 10000.0
+#pattern = [19.,  38.,  12.,  24.,  49.,  35.,  6.,  12.,  25.,  50.,  36., 9.,  19.,  39.,  15.,  30.,  60.]
+psize   = 9
 
 dat = mfile.loadOneSymbol("JPY=X", "../db/forex.db")
-#df.index = df.index.map(dateToDouble)
-dat = dat[['Close']] #return data frame
-dat = dat.head(200)
-df  = dat.diff()
-#df = df.dropna()
-fn = lambda x: (1.0 if x > 0.0 else 0.0)
-xx = df['Close'].apply(fn)
-L0 = xx
-print(L0)
-L1 = xx.shift(-1)
-print(L1)
-L2 = xx.shift(-2)
-L3 = xx.shift(-3)
-L4 = xx.shift(-4)
-L5 = xx.shift(-5)
-yy = L0 * 32 + L1 * 16 + L2 * 8 + L3 * 4 + L4 * 2 + L5
-zz = yy.copy()
-zz[zz != stop] = np.nan
-style.use('ggplot')
-plt.plot(yy.index, yy)
-plt.plot(zz.index, zz, "bo")
-plt.plot(dat.index, dat['Close']/2.0)
-print(yy)
-plt.show()
+
+yy = iching.getHexgram(mcalc.m_sample_y(dat))
+pattern = yy.dropna().values
+num     = len(pattern)
+
+#dat = mcalc.m_sample_w(dat)
+yy = iching.getHexgram(dat)
+#iching.plot(y1, dat)
+
+def fMatch(a, **kwargs):
+    for i in range(0, num-psize+1, 1):
+        p1 = pattern[i:i+psize]
+        rv = np.sqrt(np.sum((a - p1)**2))
+        if rv == 0:
+            print(a)
+            return 0
+    return 1
+
+rv = yy.rolling(psize).apply(fMatch)
+print(rv.values)
