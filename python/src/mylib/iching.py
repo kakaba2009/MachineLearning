@@ -13,14 +13,14 @@ kun  =int('000000', 2) #101010 I Ching 02
 def dateToDouble(d):
     return (d.year * 10000.0 + d.month * 100.0 + d.day) / 10000.0
 
-def getHexgram(dat, p = False):
+def getHexgram(dat, field = 'Close', p = False):
     # df.index = df.index.map(dateToDouble)
-    dat = dat[['Close']]  # return data frame
+    dat = dat[[field]]  # return data frame
     # dat = dat.head(200)
     df = dat.diff()
     # df = df.dropna()
     fn = lambda x: (1.0 if x > 0.0 else 0.0)
-    xx = df['Close'].apply(fn)
+    xx = df[field].apply(fn)
     L0 = xx
     #print(L0)
     L1 = xx.shift(-1)
@@ -34,16 +34,16 @@ def getHexgram(dat, p = False):
         print(yy.values)
     return yy
 
-def plot(yy, dat, ratio = 0.5):
+def plot(yy, dat, field = 'Close', ratio = 0.5):
     zz = yy.copy()
     zz[zz != stop] = np.nan
     style.use('ggplot')
     plt.plot(yy.index, yy)
     plt.plot(zz.index, zz, "bo")
-    plt.plot(dat.index, dat['Close'] * ratio)
+    plt.plot(dat.index, dat[field] * ratio)
     plt.show()
 
-def searchPattern(yy, pattern, length, psize):
+def searchPattern(yy, pattern, length, psize, p = False):
     def fMatch(a, **kwargs):
         for i in range(0, length - psize + 1, 1):
             p1 = pattern[i:i + psize]
@@ -54,4 +54,6 @@ def searchPattern(yy, pattern, length, psize):
         return 1
 
     rv = yy.rolling(psize).apply(fMatch)
-    print(rv.values)
+
+    if p == True:
+        print(rv.values)
