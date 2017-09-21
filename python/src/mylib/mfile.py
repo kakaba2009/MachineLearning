@@ -45,7 +45,7 @@ def loadSymbolList(path, db = 'FX'):
 def loadAll(path, db = 'FX', dropDate=False):
     con = create_engine('sqlite:///' + path)
 
-    query = 'SELECT * FROM ' + db
+    query = 'SELECT * FROM ' + db + ' ORDER BY Date ASC'
 
     df = pd.read_sql_query(query, con, index_col ="Date", parse_dates=["Date"])
     
