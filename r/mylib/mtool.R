@@ -71,16 +71,16 @@ getQuantmod <- function(symbol) {
     return(df)    
 }
 
-getQuandl <- function(symbol, feq="daily", start="1900-01-01", end = today(), t="raw") {
+getQuandl <- function(symbol, feq="daily", start="1980-01-01", end="2032-01-01", t="raw", o="asc") {
     if(nchar(mtool.api) >0 ) {
         Quandl.api_key(mtool.api)
     }
     
-    df <- Quandl(symbol, collapse=feq, start_date=start, end_date=end, type=t)
+    df <- Quandl(symbol, collapse=feq, start_date=start, end_date=end, type=t, order=o)
     
     class(df)
     
-    return(df)   
+    return(df)
 }
 
 search <- function(symbol="Oil", db="YAHOO") {

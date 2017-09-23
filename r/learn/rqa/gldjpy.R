@@ -9,7 +9,7 @@ end   = "2016-02-28"
 
 r <- 31.1035 
 
-jpy <- getQuandl("CUR/JPY", "daily", start, end, "raw")
+jpy <- getQuandl("CURRFX/USDJPY", "daily", start, end, "raw")
 gld <- getQuandl("CHRIS/CME_GC1", "daily", start, end, "raw")
 
 setDT(jpy)
