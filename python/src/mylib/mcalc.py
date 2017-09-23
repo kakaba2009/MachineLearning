@@ -120,7 +120,7 @@ def m_sample_base(df, feq):
     o = df["Open" ].resample(feq, axis=0).first()
     h = df["High" ].resample(feq, axis=0).max()
     l = df["Low"  ].resample(feq, axis=0).min()
-    c = df["Last" ].resample(feq, axis=0).last()
+    c = df["Close"].resample(feq, axis=0).last()
     
     o = o.fillna(method='backfill')
     h = h.fillna(method='backfill')
