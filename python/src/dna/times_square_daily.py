@@ -5,7 +5,7 @@ import src.mylib.mfile as mfile
 import src.mylib.mcalc as mcalc
 from matplotlib.finance import candlestick2_ohlc
 
-dat = mfile.loadOneSymbol("CHRIS/CME_GC1", "../db/Metals.db", 'monthly')
+dat = mfile.loadOneSymbol("CHRIS/CME_GC1", "../db/Metals.db", 'daily')
 dat = dat[dat.index > '2015-01-01']
 y0  = dat['Close'].min()
 idx = dat['Close'].idxmin()
