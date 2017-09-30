@@ -21,15 +21,15 @@ print(y1)
 fig, ax = plt.subplots()
 candlestick2_ohlc(ax, dat['Open'], dat['High'], dat['Low'], dat['Close'], width=0.6)
 a = 0.00
-s = 30.0
+s = 15
 L = len(dat['Close'])
 y = y0
-for i in range(20):
+for i in range(31):
     yy = (np.sqrt(y) + a / 180.0)**2
     ax.plot([0, L], [yy, yy], 'blue')
     a += s
 
-P = y1 - y0
+P = y1
 t = np.sqrt(P)
 print(t)
 ax.plot([x0, x0, x1, x1, x0], [y0, y1, y1, y0, y0], 'green')
